@@ -18,6 +18,7 @@
 import { BotMsgType, MsgItemElem } from './elements/information'
 import { useUIStore } from '@renderer/state/ui'
 import { useSettingsStore } from '@renderer/state/settings'
+import { getMessageTail } from './utils/messageTail'
 
 /**
  * 反序列化消息
@@ -89,17 +90,13 @@ function parseMsgToJSON(msg: string, cache: MsgItemElem[]) {
         }
     })
     // 插入小尾巴
-    if (settingsStore.sysConfig.msg_taill) {
-        const taill = (settingsStore.sysConfig.msg_taill as string).replaceAll(
-            '\\n',
-            '\n',
-        )
-        if (taill && taill != '') {
-            for (let i = back.length - 1; i >= 0; i--) {
-                if (back[i].type == 'text') {
-                    back[i].text = back[i].text + taill
-                    break
-                }
+    const taill = getMessageTail(settingsStore.sysConfig)
+    if (taill) {
+        for (let i = back.length - 1; i >= 0; i--) {
+            if (back[i].type == 'text') {
+                if (settingsStore.sysConfig.random_msg_tail && !back[i].text?.trim()) continue
+                back[i].text = back[i].text + taill
+                break
             }
         }
     }
@@ -110,6 +107,7 @@ function parseMsgToJSON(msg: string, cache: MsgItemElem[]) {
 function parseMsgToCQ(msg: string, cache: MsgItemElem[]) {
     const settingsStore = useSettingsStore()
     let back = ''
+    let lastTextEnd = -1
     // 处理消息文本
     const specialList = getSQList(msg)
     if (specialList !== null) {
@@ -125,6 +123,7 @@ function parseMsgToCQ(msg: string, cache: MsgItemElem[]) {
                 // 添加前段文本
                 if (cutMsg !== '') {
                     back += cutMsg
+                    if (cutMsg.trim()) lastTextEnd = back.length
                 }
                 // 添加后段特殊消息
                 if (cache[index] !== null) {
@@ -143,12 +142,19 @@ function parseMsgToCQ(msg: string, cache: MsgItemElem[]) {
     }
     if (msg !== '') {
         back += msg
+        if (msg.trim()) lastTextEnd = back.length
     }
     // 插入小尾巴
-    if (settingsStore.sysConfig.msg_taill) {
-        back =
-            back +
-            (settingsStore.sysConfig.msg_taill as string).replaceAll('\\n', '\n')
+    const taill = getMessageTail(settingsStore.sysConfig)
+    if (taill) {
+        if (settingsStore.sysConfig.random_msg_tail) {
+            if (lastTextEnd >= 0) {
+                const escapedTail = taill.replaceAll('&', '&amp;').replaceAll('[', '&#91;').replaceAll(']', '&#93;')
+                back = back.slice(0, lastTextEnd) + escapedTail + back.slice(lastTextEnd)
+            }
+        } else {
+            back += taill
+        }
     }
     // 返回
     return back

@@ -107,6 +107,8 @@ export const optDefault: { [key: string]: any } = {
     session_display_mode: 'recent' as 'recent' | 'all',
     close_respond: false,
     msg_taill: '',
+    random_msg_tail: false,
+    random_msg_tail_text: '',
     quick_send: 'default',
     group_notice_type: 'none',
     send_face: false,

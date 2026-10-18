@@ -107,11 +107,34 @@
                 <font-awesome-icon :icon="['fas', 'fish-fins']" />
                 <div>
                     <label for="opt-function-msg-tail">{{ $t('小尾巴') }}</label>
-                    <span>{{ $t('只会追加在最后一段话后面') }}</span>
+                    <span>{{ settingsStore.sysConfig.random_msg_tail ? $t('随机小尾巴已开启，此处的固定内容暂不使用') : $t('只会追加在最后一段话后面') }}</span>
                 </div>
                 <input id="opt-function-msg-tail" v-model="settingsStore.sysConfig.msg_taill"
                     class="ss-input" style="width: 150px"
                     type="text" name="msg_taill" @keyup="save">
+            </div>
+            <div class="opt-item">
+                <div :class="checkDefault('random_msg_tail')" />
+                <font-awesome-icon :icon="['fas', 'fish-fins']" />
+                <div>
+                    <label for="opt-function-random-msg-tail">{{ $t('随机小尾巴') }}</label>
+                    <span>{{ $t('每条文字消息随机追加一条；纯图片、文件和表情不追加') }}</span>
+                </div>
+                <label class="ss-switch">
+                    <input id="opt-function-random-msg-tail" v-model="settingsStore.sysConfig.random_msg_tail"
+                        type="checkbox" name="random_msg_tail" @change="save">
+                    <div><div /></div>
+                </label>
+            </div>
+            <div v-if="settingsStore.sysConfig.random_msg_tail" class="opt-item random-tail-options">
+                <div :class="checkDefault('random_msg_tail_text')" />
+                <div>
+                    <label for="opt-function-random-msg-tail-text">{{ $t('候选小尾巴') }}</label>
+                    <span>{{ $t('每行一条，忽略空行；可用 \\n 表示换行。列表为空时不追加。') }}</span>
+                </div>
+                <textarea id="opt-function-random-msg-tail-text" v-model="settingsStore.sysConfig.random_msg_tail_text"
+                    class="ss-input" rows="5" name="random_msg_tail_text"
+                    @input="saveRandomTails" />
             </div>
             <div class="opt-item">
                 <div :class="checkDefault('send_face')" />
@@ -491,6 +514,10 @@
         }, 300)
     }
 
+    function saveRandomTails(event: Event) {
+        runAS('random_msg_tail_text', (event.target as HTMLTextAreaElement).value)
+    }
+
     function toggleSessionDisplay(event: Event) {
         const sender = event.target as HTMLInputElement
         runAS('session_display_mode', sender.checked ? 'all' : 'recent')
@@ -585,6 +612,18 @@
     }
 </script>
 <style>
+    .random-tail-options {
+        flex-wrap: wrap;
+    }
+
+    .random-tail-options textarea {
+        width: 100%;
+        min-height: 100px;
+        margin-top: 12px;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+
     .ss-switch input:checked ~ div {
         background: var(--color-main) !important;
     }
