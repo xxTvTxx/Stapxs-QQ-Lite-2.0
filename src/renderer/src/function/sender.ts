@@ -90,7 +90,8 @@ function parseMsgToJSON(msg: string, cache: MsgItemElem[]) {
         }
     })
     // 插入小尾巴
-    const taill = getMessageTail(settingsStore.sysConfig)
+    const hasText = back.some((item) => item.type === 'text' && item.text?.trim())
+    const taill = settingsStore.sysConfig.random_msg_tail && !hasText ? '' : getMessageTail(settingsStore.sysConfig)
     if (taill) {
         for (let i = back.length - 1; i >= 0; i--) {
             if (back[i].type == 'text') {
@@ -145,7 +146,7 @@ function parseMsgToCQ(msg: string, cache: MsgItemElem[]) {
         if (msg.trim()) lastTextEnd = back.length
     }
     // 插入小尾巴
-    const taill = getMessageTail(settingsStore.sysConfig)
+    const taill = settingsStore.sysConfig.random_msg_tail && lastTextEnd < 0 ? '' : getMessageTail(settingsStore.sysConfig)
     if (taill) {
         if (settingsStore.sysConfig.random_msg_tail) {
             if (lastTextEnd >= 0) {

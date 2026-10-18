@@ -130,7 +130,7 @@
                 <div :class="checkDefault('random_msg_tail_text')" />
                 <div>
                     <label for="opt-function-random-msg-tail-text">{{ $t('候选小尾巴') }}</label>
-                    <span>{{ $t('每行一条，忽略空行；可用 \\n 表示换行。列表为空时不追加。') }}</span>
+                    <span>{{ $t('每行一条，忽略空行；可用 \\n 表示换行。至少两条不同候选时不连续重复，只有一条时使用该条；列表为空时不追加。') }}</span>
                 </div>
                 <textarea id="opt-function-random-msg-tail-text" v-model="settingsStore.sysConfig.random_msg_tail_text"
                     class="ss-input" rows="5" name="random_msg_tail_text"
